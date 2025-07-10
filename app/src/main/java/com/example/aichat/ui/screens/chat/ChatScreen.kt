@@ -43,10 +43,12 @@ import com.example.aichat.ui.widgets.MessageCard
  * プライベートな `ChatScreen` コンポーザブル関数を呼び出します。
  *
  * @param modifier このコンポーザブルに適用する修飾子。デフォルトは Modifier です。
+ * @param navigateToSettings 設定画面へ遷移するためのコールバック関数。
  */
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
+    navigateToSettings: () -> Unit = {},
 ) {
     var text by remember { mutableStateOf("") }
     //TODO: 今後修正予定
@@ -56,13 +58,24 @@ fun ChatScreen(
     ChatScreen(
         modifier = modifier,
         text = text,
-        onTextChange = { text = it },
+        onTextChange = {
+            //TODO: 修正予定
+            text = it
+        },
         messages = messages,
         isCommunicating = isCommunicating,
-        onDelete = { },
-        onSettings = { },
-        onSend = { text = "" },
-        onCamera = { isCommunicating = !isCommunicating },
+        onDelete = {
+            //TODO: 修正予定
+        },
+        onSettings = navigateToSettings,
+        onSend = {
+            //TODO: 修正予定
+            text = ""
+        },
+        onCamera = {
+            //TODO: 修正予定
+            isCommunicating = !isCommunicating
+        },
     )
 }
 
