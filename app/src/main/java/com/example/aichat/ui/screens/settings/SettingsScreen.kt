@@ -19,12 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
@@ -34,23 +31,26 @@ import androidx.compose.ui.unit.dp
  * 現在、API キーの設定のみが可能です。
  *
  * @param modifier コンポーザブルに適用する修飾子。
+ * @param viewModel 設定画面の ViewModel。
  * @param onBack 戻るボタンが押されたときに呼び出されるコールバック関数。
  */
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel,
     onBack: () -> Unit = {},
 ) {
-    var apiKey by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
 
     SettingsScreen(
         modifier = modifier,
-        apiKey = apiKey,
-        onApiKeyChange = { apiKey = it },
+        apiKey = uiState.apiKey,
+        onApiKeyChange = viewModel::updateApiKey,
         onBack = onBack,
         onSave = {
-            /* TODO: APIキーを保存する */
-            onBack()
+            viewModel.saveSettings {
+                onBack()
+            }
         },
     )
 }
@@ -152,13 +152,3 @@ private fun MainContent(
     }
 }
 
-/**
- * SettingsScreenのプレビュー用コンポーザブル関数。
- *
- * この関数は、開発中にSettingsScreenの見た目や動作を確認するために使用されます。
- */
-@Preview
-@Composable
-private fun SettingsScreenPreview() {
-    SettingsScreen()
-}

@@ -2,6 +2,7 @@ package com.example.aichat.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,6 +36,7 @@ fun AppNavGraph(
         }
         composable<AppScreen.Settings> {
             SettingsScreen(
+                viewModel = viewModel(),
                 onBack = { navController.popBackStack() }
             )
         }
