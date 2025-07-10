@@ -27,15 +27,54 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * 設定画面のコンポーザブル関数。
+ *
+ * このコンポーザブル関数は設定画面を表示し、ユーザーがアプリケーションを設定できるようにします。
+ * 現在、API キーの設定のみが可能です。
+ *
+ * @param modifier コンポーザブルに適用する修飾子。
+ * @param onBack 戻るボタンが押されたときに呼び出されるコールバック関数。
+ */
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
-    onSave: () -> Unit = {},
 ) {
     var apiKey by remember { mutableStateOf("") }
 
+    SettingsScreen(
+        modifier = modifier,
+        apiKey = apiKey,
+        onApiKeyChange = { apiKey = it },
+        onBack = onBack,
+        onSave = {
+            /* TODO: APIキーを保存する */
+            onBack()
+        },
+    )
+}
+
+/**
+ * 設定画面の内部実装。
+ *
+ * このコンポーザブル関数は、設定画面のUI要素（トップバーとメインコンテンツ）を構成します。
+ *
+ * @param modifier このコンポーザブルに適用する修飾子。
+ * @param apiKey 現在のAPIキーの値。
+ * @param onApiKeyChange APIキーが変更されたときに呼び出されるコールバック関数。新しいAPIキーを引数に取ります。
+ * @param onBack 戻るボタンが押されたときに呼び出されるコールバック関数。
+ * @param onSave 保存ボタンが押されたときに呼び出されるコールバック関数。
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    apiKey: String,
+    onApiKeyChange: (String) -> Unit,
+    onBack: () -> Unit,
+    onSave: () -> Unit,
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -44,7 +83,7 @@ fun SettingsScreen(
                 title = { Text(text = "設定画面") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -70,16 +109,25 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .padding(8.dp),
             apiKey = apiKey,
-            onApiKeyChange = { apiKey = it },
+            onApiKeyChange = onApiKeyChange,
         )
     }
 }
 
+/**
+ * 設定画面のメインコンテンツを表示するコンポーザブル関数。
+ *
+ * この関数は、APIキーを入力するためのテキストフィールドを表示します。
+ *
+ * @param modifier このコンポーザブルに適用する修飾子。
+ * @param apiKey 現在のAPIキーの値。
+ * @param onApiKeyChange APIキーが変更されたときに呼び出されるコールバック関数。新しいAPIキーを引数に取ります。
+ */
 @Composable
-fun MainContent(
+private fun MainContent(
     modifier: Modifier = Modifier,
-    apiKey: String = "",
-    onApiKeyChange: (String) -> Unit = {},
+    apiKey: String,
+    onApiKeyChange: (String) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -104,8 +152,13 @@ fun MainContent(
     }
 }
 
+/**
+ * SettingsScreenのプレビュー用コンポーザブル関数。
+ *
+ * この関数は、開発中にSettingsScreenの見た目や動作を確認するために使用されます。
+ */
 @Preview
 @Composable
-fun SettingsScreenPreview() {
+private fun SettingsScreenPreview() {
     SettingsScreen()
 }
