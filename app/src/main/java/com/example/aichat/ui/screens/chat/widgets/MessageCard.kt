@@ -1,4 +1,4 @@
-package com.example.aichat.ui.widgets
+package com.example.aichat.ui.screens.chat.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

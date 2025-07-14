@@ -17,10 +17,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.aichat.R
 import com.example.aichat.data.models.Message
-import com.example.aichat.ui.widgets.MessageCard
+import com.example.aichat.ui.screens.chat.widgets.MessageCard
 
 /**
  * チャット画面のメインコンポーザブル関数です。
@@ -50,31 +53,55 @@ fun ChatScreen(
     modifier: Modifier = Modifier,
     navigateToSettings: () -> Unit = {},
 ) {
-    var text by remember { mutableStateOf("") }
-    //TODO: 今後修正予定
-    val messages: List<Message> = emptyList()
-    var isCommunicating by remember { mutableStateOf(false) }
+    //TODO: 削除予定
+    var uiState by remember {
+        mutableStateOf(
+            ChatUiState()
+        )
+    }
 
     ChatScreen(
         modifier = modifier,
-        text = text,
+        uiState = uiState,
         onTextChange = {
             //TODO: 修正予定
-            text = it
+            uiState = uiState.copy(
+                text = it
+            )
         },
-        messages = messages,
-        isCommunicating = isCommunicating,
         onDelete = {
             //TODO: 修正予定
+            uiState = uiState.copy(
+                messages = emptyList()
+            )
         },
         onSettings = navigateToSettings,
         onSend = {
             //TODO: 修正予定
-            text = ""
+            val messageSize = uiState.messages.size
+            val author = if (messageSize % 2 == 0) Message.Author.USER else Message.Author.AI
+
+            val message = Message(
+                id = messageSize.toLong(),
+                text = uiState.text,
+                author = author,
+            )
+            uiState = uiState.copy(
+                messages = uiState.messages + message,
+                text = "",
+            )
         },
         onCamera = {
             //TODO: 修正予定
-            isCommunicating = !isCommunicating
+            uiState = uiState.copy(
+                userMessage = "カメラ機能は未実装です"
+            )
+        },
+        userMessageShown = {
+            //TODO: 修正予定
+            uiState = uiState.copy(
+                userMessage = null
+            )
         },
     )
 }
@@ -87,9 +114,8 @@ fun ChatScreen(
  * メインコンテンツは、`MainContent` コンポーザブル関数によって表示されます。
  *
  * @param modifier このコンポーザブルに適用する修飾子。
- * @param text 入力フィールドに表示される現在のテキスト。
+ * @param uiState チャット画面の状態を保持するオブジェクト。
  * @param onTextChange 入力フィールドのテキストが変更されたときに呼び出されるコールバック関数。
- * @param messages 表示するメッセージのリスト。
  * @param onDelete 削除ボタンがクリックされたときに呼び出されるコールバック関数。
  * @param onSettings 設定ボタンがクリックされたときに呼び出されるコールバック関数。
  * @param onSend 送信ボタンがクリックされたときに呼び出されるコールバック関数。
@@ -99,17 +125,29 @@ fun ChatScreen(
 @Composable
 private fun ChatScreen(
     modifier: Modifier = Modifier,
-    text: String,
+    uiState: ChatUiState,
+    userMessageShown: () -> Unit,
     onTextChange: (String) -> Unit,
-    messages: List<Message>,
-    isCommunicating: Boolean,
     onDelete: () -> Unit,
     onSettings: () -> Unit,
     onSend: () -> Unit,
     onCamera: () -> Unit,
 ) {
+    val snackBarHostState = remember { SnackbarHostState() }
+
+    val userMessage = uiState.userMessage
+    LaunchedEffect(userMessage) {
+        if(userMessage == null) return@LaunchedEffect
+
+        snackBarHostState.showSnackbar(
+            message = userMessage,
+        )
+        userMessageShown()
+    }
+
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
             TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
@@ -121,7 +159,7 @@ private fun ChatScreen(
                 actions = {
                     IconButton(
                         onClick = onDelete,
-                        enabled = messages.isNotEmpty(),
+                        enabled = uiState.messages.isNotEmpty(),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -143,10 +181,10 @@ private fun ChatScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(8.dp),
-            text = text,
+            text = uiState.text,
             onTextChange = onTextChange,
-            messages = messages,
-            isCommunicating = isCommunicating,
+            messages = uiState.messages.reversed(),
+            isCommunicating = uiState.isCommunicating,
             onSend = onSend,
             onCamera = onCamera,
         )
@@ -240,27 +278,30 @@ private fun MainContent(
 }
 
 /**
- * ChatScreenコンポーザブルのプレビュー関数です。
+ * `ChatScreen` コンポーザブルのプレビュー関数です。
  *
  * この関数は、Android Studioのプレビュー機能でChatScreenの表示を確認するために使用されます。
  * サンプルのメッセージ履歴と固定のテキスト、空のコールバック関数でChatScreenを呼び出します。
  */
 @Preview
 @Composable
-private fun ChatScreenPreview() {
+private fun ChatScreenPreview() { // ktlint-disablefilename
     val sampleHistory = listOf(
         Message(id = 1, text = "こんにちは！", author = Message.Author.USER),
         Message(id = 2, text = "これはAIからの返信です。", author = Message.Author.AI),
         Message(id = 3, text = "もう一度ユーザーからのメッセージです。", author = Message.Author.USER)
     )
     ChatScreen(
-        text = "サンプルテキスト",
+        uiState = ChatUiState(
+            text = "サンプルテキスト",
+            messages = sampleHistory,
+            isCommunicating = false,
+        ),
         onTextChange = {},
-        messages = sampleHistory,
-        isCommunicating = false,
         onDelete = {},
         onSettings = {},
         onSend = {},
-        onCamera = {}
+        onCamera = {},
+        userMessageShown = {}
     )
 }

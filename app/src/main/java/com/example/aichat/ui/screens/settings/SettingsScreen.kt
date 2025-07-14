@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
@@ -44,7 +45,7 @@ fun SettingsScreen(
 
     SettingsScreen(
         modifier = modifier,
-        apiKey = uiState.apiKey,
+        uiState = uiState,
         onApiKeyChange = viewModel::updateApiKey,
         onBack = onBack,
         onSave = {
@@ -61,7 +62,7 @@ fun SettingsScreen(
  * このコンポーザブル関数は、設定画面のUI要素（トップバーとメインコンテンツ）を構成します。
  *
  * @param modifier このコンポーザブルに適用する修飾子。
- * @param apiKey 現在のAPIキーの値。
+ * @param uiState 設定画面の状態を表すオブジェクト。APIキーなどの情報を含みます。
  * @param onApiKeyChange APIキーが変更されたときに呼び出されるコールバック関数。新しいAPIキーを引数に取ります。
  * @param onBack 戻るボタンが押されたときに呼び出されるコールバック関数。
  * @param onSave 保存ボタンが押されたときに呼び出されるコールバック関数。
@@ -70,7 +71,7 @@ fun SettingsScreen(
 @Composable
 private fun SettingsScreen(
     modifier: Modifier = Modifier,
-    apiKey: String,
+    uiState: SettingsUiState,
     onApiKeyChange: (String) -> Unit,
     onBack: () -> Unit,
     onSave: () -> Unit,
@@ -108,7 +109,7 @@ private fun SettingsScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(8.dp),
-            apiKey = apiKey,
+            apiKey = uiState.apiKey,
             onApiKeyChange = onApiKeyChange,
         )
     }
@@ -152,3 +153,14 @@ private fun MainContent(
     }
 }
 
+@Preview
+@Composable
+private fun SettingsScreenPreview() {
+    val uiState = SettingsUiState(apiKey = "test_api_key")
+    SettingsScreen(
+        uiState = uiState,
+        onApiKeyChange = {},
+        onBack = {},
+        onSave = {}
+    )
+}
